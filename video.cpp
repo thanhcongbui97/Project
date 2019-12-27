@@ -1,34 +1,30 @@
 #include "opencv2/opencv.hpp"
 #include <iostream>
- 
+#include <unistd.h> 
 using namespace std;
 using namespace cv;
  
-void display(VideoCapture cap, Mat img, Mat imgGray){
+void display(VideoCapture cap, Mat img, Mat imgGray, int second){
  
-  // Create a VideoCapture object and open the input file
-  // If the input is the web camera, pass 0 instead of the video file name
-  //VideoCapture cap("a.mp4"); 
+	if(!cap.isOpened()){
+		cout << "Error opening video stream or file" << endl;
+	}   
+	namedWindow("Streamming");
+	int fps = cap.get(CAP_PROP_FPS);
+	int frame_no = second*fps;
+    cout << "Playing video at "<<fps<<" fps"<<" from frames "<<frame_no<<endl;
+	while(1)
+	{
+	cap.set(CAP_PROP_POS_FRAMES, frame_no);
     
-  // Check if camera opened successfully
-  if(!cap.isOpened()){
-    cout << "Error opening video stream or file" << endl;
-  }
-     
-    //Mat frame, imgGray;
-  while(1){
- 
-    // Capture frame-by-frame
-    cap >> img;
-  //cap.read(frame);
-	cvtColor(img, imgGray, cv::COLOR_BGR2GRAY);
+	cap >> img;
     // If the frame is empty, break immediately
     if (img.empty())
       break;
  
     // Display the resulting frame
-    imshow( "Frame", imgGray );
- 
+    imshow( "Streamming", img );
+	frame_no++;
     // Press  ESC on keyboard to exit
     char c=(char)waitKey(25);
     if(c==27)
@@ -40,5 +36,4 @@ void display(VideoCapture cap, Mat img, Mat imgGray){
  
   // Closes all the frames
   destroyAllWindows();
-    
 }
