@@ -5,13 +5,10 @@ LIBS = $(OPENCV)
 
 all: server client
 
-client: src/cli.cpp video.cpp
-	$(CC) $(CFLAGS) -o client src/cli.cpp video.cpp $(LIBS)
+client: client.c video.cpp
+	$(CC) $(CFLAGS) -o client client.c video.cpp $(LIBS)
 
-server: src/srv.cpp
-	$(CC) $(CFLAGS) -o server src/srv.cpp  $(LIBS) -lpthread
+server: server.c
+	gcc server.c -o server 
 clean:
-	rm -f *.o 
-test: test.cpp
-	g++ test.cpp -o test `pkg-config opencv4 --cflags --libs`
-
+	rm client server 

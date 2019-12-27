@@ -1,16 +1,15 @@
 #include <sys/types.h>
-
+#include <string.h>
 #include <sys/socket.h>
-
+#include <unistd.h>
 #include <arpa/inet.h>
-
 #include <netinet/in.h>
-
 #include <stdio.h>
-
 #include <stdlib.h>
 
- 
+#define L_ADDR "10.72.63.197"
+#define M_ADDR "226.1.1.1"
+#define PORT 2612
 
 struct sockaddr_in localSock;
 
@@ -20,7 +19,7 @@ int sd;
 
 int datalen;
 
-char databuf[1024];
+char databuf[6];
 
  
 
@@ -84,7 +83,7 @@ memset((char *) &localSock, 0, sizeof(localSock));
 
 localSock.sin_family = AF_INET;
 
-localSock.sin_port = htons(4321);
+localSock.sin_port = htons(PORT);
 
 localSock.sin_addr.s_addr = INADDR_ANY;
 
@@ -114,9 +113,9 @@ printf("Binding datagram socket...OK.\n");
 
 /* datagrams are to be received. */
 
-group.imr_multiaddr.s_addr = inet_addr("226.1.1.1");
+group.imr_multiaddr.s_addr = inet_addr(M_ADDR);
 
-group.imr_interface.s_addr = inet_addr("10.72.63.197");
+group.imr_interface.s_addr = inet_addr(L_ADDR);
 
 if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)
 
@@ -156,9 +155,8 @@ else
 
 {
 
-printf("Reading datagram message...OK.\n");
+printf("Receving packet...%sOK.\n", databuf);
 
-printf("The message from multicast server is: \"%s\"\n", databuf);
 
 }
 
