@@ -8,9 +8,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
-#include "opencv2/opencv.hpp"
 
-using namespace cv;
 using namespace std;
 
 #define M_ADDR "226.1.1.1"
@@ -75,7 +73,7 @@ int main(int argc, char *argv[])
 
     /* multicast capable interface. */
 
-    localInterface.s_addr = inet_addr("10.72.63.197");
+    localInterface.s_addr = inet_addr("127.0.0.1");
 
     if (setsockopt(sd, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) < 0)
 
