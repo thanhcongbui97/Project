@@ -4,8 +4,9 @@
 using namespace std;
 using namespace cv;
  
-void display(VideoCapture cap, Mat img, Mat imgGray, int second){
- 
+void display(int second){
+	VideoCapture cap("video.mp4");
+   	Mat img;
 	if(!cap.isOpened()){
 		cout << "Error opening video stream or file" << endl;
 	}   
