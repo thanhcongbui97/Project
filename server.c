@@ -1,26 +1,21 @@
 #include <sys/types.h>
-
+#include <string.h>
 #include <sys/socket.h>
-
+#include <unistd.h>
 #include <arpa/inet.h>
-
 #include <netinet/in.h>
-
 #include <stdio.h>
-
 #include <stdlib.h>
+
+#define L_ADDR "10.72.63.196"
+#define M_ADDR "226.1.1.1"
+#define PORT 2612
 
 struct in_addr localInterface;
 
 struct sockaddr_in groupSock;
 
 int sd;
-
-char databuf[1024] = "Multicast test message lol!";
-
-int datalen = sizeof(databuf);
-
- 
 
 int main (int argc, char *argv[ ])
 
@@ -54,9 +49,9 @@ memset((char *) &groupSock, 0, sizeof(groupSock));
 
 groupSock.sin_family = AF_INET;
 
-groupSock.sin_addr.s_addr = inet_addr("226.1.1.1");
+groupSock.sin_addr.s_addr = inet_addr(M_ADDR);
 
-groupSock.sin_port = htons(4321);
+groupSock.sin_port = htons(PORT);
 
  
 
@@ -94,7 +89,7 @@ printf("Disabling the loopback...OK.\n");
 
 /* multicast capable interface. */
 
-localInterface.s_addr = inet_addr("10.72.63.197");
+localInterface.s_addr = inet_addr(L_ADDR);
 
 if(setsockopt(sd, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) < 0)
 
@@ -116,15 +111,22 @@ else
 
 /*int datalen = 1024;*/
 
-if(sendto(sd, databuf, datalen, 0, (struct sockaddr*)&groupSock, sizeof(groupSock)) < 0)
 
-{perror("Sending datagram message error");}
-
-else
-
-  printf("Sending datagram message...OK\n");
-
- 
+    printf("Reading video frame...\n");
+    printf("Streaming packet to Multicast Group ID: %s\n...\n",M_ADDR);
+    int i = 1;
+    char *c = (char*)malloc(sizeof(int));
+    while(i)
+    {
+        sprintf(c,"%d",i);
+        if (sendto(sd,c, 4, 0, (struct sockaddr *)&groupSock, sizeof(groupSock)) < 0)
+        {
+            perror("Sending packet error");
+        }
+        printf("Sent %d\n",i);
+        i++;
+        sleep(1);
+    }
 
 /* Try the re-read from the socket if the loopback is not disable
 
