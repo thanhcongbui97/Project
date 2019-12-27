@@ -23,14 +23,6 @@ struct sockaddr_in groupSock;
 
 int sd;
 
-char databuf[1024] = "HI, I'm Cong";
-
-int datalen = sizeof(databuf);
-
-VideoCapture cap("a.mp4");
-Mat img, imgGray;
-
-void display(VideoCapture cap, Mat img, Mat imgGray);
 
 int main(int argc, char *argv[])
 {
@@ -83,7 +75,7 @@ int main(int argc, char *argv[])
 
     /* multicast capable interface. */
 
-    localInterface.s_addr = inet_addr("127.0.0.1");
+    localInterface.s_addr = inet_addr("10.72.63.197");
 
     if (setsockopt(sd, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) < 0)
 
@@ -105,20 +97,15 @@ int main(int argc, char *argv[])
     /*int datalen = 1024;*/
 	printf("Reading video frame...\n");
 	printf("Streaming packet to Multicast Group ID: %s\n...\n",M_ADDR);
-  if (sendto(sd, databuf, datalen, 0, (struct sockaddr *)&groupSock, sizeof(groupSock)) < 0)
-
-    {
-        perror("Sending packet error");
-    }
 	int i = 1;
 	char *c = (char*)malloc(sizeof(int));
 	while(i)
 	{
 		sprintf(c,"%d",i);
 		if (sendto(sd,c, 4, 0, (struct sockaddr *)&groupSock, sizeof(groupSock)) < 0)
-    {
-        perror("Sending packet error");
-    }
+		{
+			perror("Sending packet error");
+		}
 		cout<<"Sent"<<c<<endl;
 		i++;
 		sleep(1);
@@ -130,7 +117,7 @@ int main(int argc, char *argv[])
 
   // Check if camera opened successfully
 /*  if(!cap.isOpened()){
-/*    cout << "Error opening video stream or file" << endl;
+    cout << "Error opening video stream or file" << endl;
   }
 	int imgSize = img.total() * img.elemSize();
 	
