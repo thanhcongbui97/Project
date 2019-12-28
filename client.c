@@ -11,13 +11,17 @@
 #define M_ADDR "226.1.1.1"
 #define PORT 2612
 
+void display( int second);
+
+int str_to_int(char *s);
+
 struct sockaddr_in localSock;
 
 struct ip_mreq group;
 
 int sd;
 
-int datalen;
+int bytes;
 
 char databuf[6];
 
@@ -137,9 +141,7 @@ printf("Adding multicast group...OK.\n");
 
 /* Read from the socket. */
 
-datalen = sizeof(databuf);
-
-if(read(sd, databuf, datalen) < 0)
+if((bytes = read(sd, databuf, 6)) < 0)
 
 {
 
@@ -156,10 +158,27 @@ else
 {
 
 printf("Receving packet...%sOK.\n", databuf);
-
+databuf[bytes+1] = '\0';
 
 }
+
+int second = str_to_int(databuf);
+display(second);
 
 return 0;
 
 }
+
+
+int str_to_int(char *s)
+{
+    int i=0, ret = 0;
+    while(s[i] != '\0')
+    {
+        ret*=10;
+        ret+=(s[i] - '0');
+        i++;
+    }
+    return ret;
+}
+
