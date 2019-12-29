@@ -9,6 +9,9 @@ client: client.c video.cpp
 	$(CC) $(CFLAGS) -o client client.c video.cpp $(LIBS)
 
 server: server.c
-	gcc server.c -o server 
+	gcc server.c -o server
+test:
+	gcc us.c -o us
+	gcc uc.c -o uc	
 clean:
 	rm client server 
