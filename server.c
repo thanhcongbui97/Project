@@ -6,10 +6,7 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#define L_ADDR "10.72.63.196"
-#define M_ADDR "226.1.1.1"
-#define PORT 2612
+#include "inc/addr.h"
 
 struct in_addr localInterface;
 
@@ -89,7 +86,7 @@ printf("Disabling the loopback...OK.\n");
 
 /* multicast capable interface. */
 
-localInterface.s_addr = inet_addr(L_ADDR);
+localInterface.s_addr = inet_addr(S_ADDR);
 
 if(setsockopt(sd, IPPROTO_IP, IP_MULTICAST_IF, (char *)&localInterface, sizeof(localInterface)) < 0)
 

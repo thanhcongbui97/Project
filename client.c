@@ -6,179 +6,158 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "inc/addr.h"
 
-#define L_ADDR "10.72.63.197"
-#define M_ADDR "226.1.1.1"
-#define PORT 2612
 
 void display( int second);
 
 int str_to_int(char *s);
 
-struct sockaddr_in localSock;
-
+struct sockaddr_in client_addr, server_addr;
 struct ip_mreq group;
-
 int sd;
-
 int bytes;
-
 char databuf[6];
 
- 
-
 int main(int argc, char *argv[])
-
 {
+	/* Create a datagram socket on which to receive. */
+	sd = socket(AF_INET, SOCK_DGRAM, 0);
+	if(sd < 0)
+	{
 
-/* Create a datagram socket on which to receive. */
+		perror("Opening datagram socket error");
 
-sd = socket(AF_INET, SOCK_DGRAM, 0);
+		exit(1);
 
-if(sd < 0)
+	}
 
-{
+	else
 
-perror("Opening datagram socket error");
+	printf("Opening datagram socket....OK.\n");
 
-exit(1);
+	 
 
-}
+	/* Enable SO_REUSEADDR to allow multiple instances of this */
 
-else
+	/* application to receive copies of the multicast datagrams. */
 
-printf("Opening datagram socket....OK.\n");
+	{
 
- 
+	int reuse = 1;
 
-/* Enable SO_REUSEADDR to allow multiple instances of this */
+	if(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) < 0)
 
-/* application to receive copies of the multicast datagrams. */
+	{
 
-{
+	perror("Setting SO_REUSEADDR error");
 
-int reuse = 1;
+	close(sd);
 
-if(setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) < 0)
+	exit(1);
 
-{
+	}
 
-perror("Setting SO_REUSEADDR error");
+	else
 
-close(sd);
+	printf("Setting SO_REUSEADDR...OK.\n");
 
-exit(1);
+	}
 
-}
+	 
 
-else
+	/* Bind to the proper port number with the IP address */
 
-printf("Setting SO_REUSEADDR...OK.\n");
+	/* specified as INADDR_ANY. */
 
-}
+	memset((char *) &client_addr, 0, sizeof(client_addr));
+	memset((char *) &server_addr, 0, sizeof(server_addr));
 
- 
+	client_addr.sin_family = AF_INET;
+	client_addr.sin_port = htons(PORT);
+	client_addr.sin_addr.s_addr = INADDR_ANY;
 
-/* Bind to the proper port number with the IP address */
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(PORT);
+	server_addr.sin_addr.s_addr = INADDR_ANY;
+	
 
-/* specified as INADDR_ANY. */
+	if(bind(sd, (struct sockaddr*)&client_addr, sizeof(client_addr)))
+	{
+	perror("Binding datagram socket error");
+	close(sd);
+	exit(1);
+	}
+	else
 
-memset((char *) &localSock, 0, sizeof(localSock));
+	printf("Binding datagram socket...OK.\n");
 
-localSock.sin_family = AF_INET;
+	 
 
-localSock.sin_port = htons(PORT);
+	/* Join the multicast group 226.1.1.1 on the local interface. Note that this IP_ADD_MEMBERSHIP option must be called for each local interface over which the multicast datagrams are to be received. */
 
-localSock.sin_addr.s_addr = INADDR_ANY;
+	group.imr_multiaddr.s_addr = inet_addr(M_ADDR);
 
-if(bind(sd, (struct sockaddr*)&localSock, sizeof(localSock)))
+	group.imr_interface.s_addr = inet_addr(C_ADDR);
 
-{
+	if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)
 
-perror("Binding datagram socket error");
+	{
+	perror("Adding multicast group error");
 
-close(sd);
+	close(sd);
 
-exit(1);
+	exit(1);
 
-}
+	}
 
-else
+	else
 
-printf("Binding datagram socket...OK.\n");
+	printf("Adding multicast group...OK.\n");
 
- 
+	 
 
-/* Join the multicast group 226.1.1.1 on the local 203.106.93.94 */
+	/* Read from the socket. */
 
-/* interface. Note that this IP_ADD_MEMBERSHIP option must be */
+	if((bytes = read(sd, databuf, 6)) < 0)
 
-/* called for each local interface over which the multicast */
+	{
 
-/* datagrams are to be received. */
+	perror("Reading datagram message error");
 
-group.imr_multiaddr.s_addr = inet_addr(M_ADDR);
+	close(sd);
 
-group.imr_interface.s_addr = inet_addr(L_ADDR);
+	exit(1);
 
-if(setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&group, sizeof(group)) < 0)
+	}
 
-{
+	else
 
-perror("Adding multicast group error");
+	{
 
-close(sd);
+	printf("Receving packet...%sOK.\n", databuf);
+	databuf[bytes+1] = '\0';
 
-exit(1);
+	}
 
-}
+	int second = str_to_int(databuf);
+	int len = sizeof(server_addr);
+	sendto(sd, (const char*)databuf, strlen(databuf), MSG_CONFIRM, (sockaddr*)&server_addr, len);
+	display(second);
 
-else
-
-printf("Adding multicast group...OK.\n");
-
- 
-
-/* Read from the socket. */
-
-if((bytes = read(sd, databuf, 6)) < 0)
-
-{
-
-perror("Reading datagram message error");
-
-close(sd);
-
-exit(1);
-
-}
-
-else
-
-{
-
-printf("Receving packet...%sOK.\n", databuf);
-databuf[bytes+1] = '\0';
-
-}
-
-int second = str_to_int(databuf);
-display(second);
-
-return 0;
-
+	return 0;
 }
 
 
-int str_to_int(char *s)
-{
-    int i=0, ret = 0;
-    while(s[i] != '\0')
-    {
-        ret*=10;
-        ret+=(s[i] - '0');
-        i++;
-    }
-    return ret;
-}
+	int str_to_int(char *s)
+	{
+		int i=0, ret = 0;
+		while(s[i] != '\0')
+		{
+			ret*=10;
+			ret+=(s[i] - '0');
+			i++;
+		}
+		return ret;
+	}
 
