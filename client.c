@@ -113,9 +113,8 @@ int main(int argc, char *argv[])
 
 	else
 
-	printf("Adding multicast group...OK.\n");
-
-	 
+	printf("Adding multicast group %s....\n", M_ADDR);
+	printf("Waiting for the server...\n");
 
 	/* Read from the socket. */
 
@@ -135,7 +134,7 @@ int main(int argc, char *argv[])
 
 	{
 
-	printf("Receving packet...%sOK.\n", databuf);
+	printf("Receving packet frame...OK.\n");
 	databuf[bytes+1] = '\0';
 
 	}

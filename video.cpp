@@ -13,7 +13,9 @@ void display(int second){
 	namedWindow("Streamming");
 	int fps = cap.get(CAP_PROP_FPS);
 	int frame_no = second*fps;
-    cout << "Playing video at "<<fps<<" fps"<<" from frames "<<frame_no<<endl;
+	cout << "Rendering video..."<<endl;
+	sleep(1);
+    cout << "Playing video at "<<fps<<" fps!!!"<<endl;
 	while(1)
 	{
 	cap.set(CAP_PROP_POS_FRAMES, frame_no);
@@ -27,6 +29,10 @@ void display(int second){
     imshow( "Streamming", img );
 	frame_no++;
     // Press  ESC on keyboard to exit
+	/*while( clock() - startTime < delay){
+		waitKey(25);
+	}
+	*/
     char c=(char)waitKey(25);
     if(c==27)
       break;
