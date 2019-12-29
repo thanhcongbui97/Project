@@ -8,7 +8,9 @@
 #include <arpa/inet.h> 
 #include <netinet/in.h> 
 
+#define S_ADDR "10.72.63.97"
 #define S_PORT	8080
+#define C_ADDR "10.72.63.97"
 #define C_PORT	 8000 
 #define MAXLINE 1024 
 
@@ -30,11 +32,11 @@ int main() {
 	
 	// Filling server information 
 	servaddr.sin_family = AF_INET; // IPv4 
-	servaddr.sin_addr.s_addr = inet_addr("10.72.63.97"); 
+	servaddr.sin_addr.s_addr = inet_addr(S_ADDR); 
 	servaddr.sin_port = htons(S_PORT); 
 	
 	cliaddr.sin_family = AF_INET; // IPv4 
-	cliaddr.sin_addr.s_addr = inet_addr("10.72.63.97"); 
+	cliaddr.sin_addr.s_addr = inet_addr(C_ADDR); 
 	cliaddr.sin_port = htons(C_PORT); 
 	// Bind the socket with the server address 
 	if ( bind(sockfd, (const struct sockaddr *)&cliaddr, 
